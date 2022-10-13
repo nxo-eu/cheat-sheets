@@ -62,19 +62,25 @@ services:
 ###  1.2. <a name='Commands'></a>Commands
 
 ```sh
-docker-compose start
-docker-compose stop
+docker compose start
+docker compose stop
 ```
 
 ```sh
-docker-compose pause
-docker-compose unpause
+docker compose pause
+docker compose unpause
 ```
 
 ```sh
-docker-compose ps
-docker-compose up
-docker-compose down
+docker compose ps
+docker compose up
+docker compose down
+```
+
+```sh
+# other cli commands are similar to docker ones, like
+docker compose build
+docker compose logs -f
 ```
 
 ###  1.3. <a name='Building'></a>Building
@@ -97,7 +103,8 @@ web:
 ```yaml
   # build from image
   image: ubuntu
-  image: ubuntu:14.04
+  image: ubuntu:20.04
+  image: nginx:latest
   image: tutum/influxdb
   image: example-registry:4000/postgresql
   image: a4bc65fd
