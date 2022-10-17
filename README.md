@@ -14,3 +14,8 @@ various cheat-sheets
 - 9. [python](markdown/python.md)
 - 10. [regexp](markdown/regexp.md)
 - 11. [yaml](markdown/yaml.md)
+
+## PDF
+
+- 1. [LaTeX](pdf/latex.pdf)
+
