@@ -3,6 +3,7 @@ title: Jinja
 category: Python
 layout: 2022/sheet
 ```
+{% raw %}
 
 **Table of Contents**
 
@@ -118,3 +119,4 @@ from jinja2 import Template
 template = Template('Hello {{ name }}!')
 template.render(name='John Doe') == u'Hello John Doe!'
 ```
+{% endraw %}
