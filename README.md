@@ -22,6 +22,7 @@ A list of concise set of notes used for quick reference.
 - [docker](markdown/docker.md)
 - [git](markdown/git.md)
 - [go](markdown/go.md)
+- [graphql](markdown/graphql.md)
 - [javascript](markdown/javascript.md)
 - [jinja2](markdown/jinja2.md)
 - [markdown](markdown/markdown.md)
