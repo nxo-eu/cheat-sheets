@@ -6,21 +6,27 @@ layout: 2022/sheet
 **Table of Contents**
 
 <!-- vscode-markdown-toc -->
-* 1. [nornir](#Norni)
-    * 1.1. [Installation](#Controlstructures)
-	* 1.2. [Initialisation](#Initialisation)
-	* 1.3. [Inventaire](#Inventaire)
-	* 1.4. [Tâches](#Tâches)
+* 1. [nornir](#Nornir)
+    * 1.1. [Installation](#Installation)
+	* 1.2. [Initialization](#Initialization)
+* 2. [Inventory](#Inventory)
+    * 2.1. [Defaults](#Defaults)
+    * 2.2. [Hosts](#Hosts)
+    * 2.3. [Groups](#Groups)
+* 3. [Visualisation] (#Visualisation)
+	* 3.1. [Accessors](#Accessors)
+    * 3.2. [Filters](#Filters)
+* 4. [Tasks](#Tasks)
 
 ###  1.1. <a name='Installation'></a>Installation
 
-Pour installer, nous avons seulement besoin de l'aide de l'outil pip.
+To install, we only need the help of the pip tool.
 
 ```shell
 pip install nornir
 ```
 
-Pour vérifier qu'on a bien installer nornir :
+To check that nornir has been installed
 ```shell
 python
 >>> from nornir import InitNornir
@@ -28,13 +34,13 @@ python
 ```
 
 
-###  1.2. <a name='Initialisation'></a>Initialisation
-Pour créer un objet nornir il faut :
+###  1.2. <a name='Initialization'></a>Initialization
+To create a nornir object, you need to :
 ```py
 from nornir import InitNornir
 nr = InitNornir(config_file="config.yaml")
 ```
-En créant un fichier config.yaml qui stock les informations concenant les hotes, les groupes,des valeurs par défaut (les identifiants, mots de passe,... ). En voici un exemple : 
+By creating a config.yaml file that stores information about hosts, groups, default values (logins, passwords,...). Here is an example: 
 ```yaml
 inventory:
        plugin: SimpleInventory
@@ -47,7 +53,7 @@ runner:
        options:
             num_workers: 2
 ```
-#### Ou on peut utiliser sans fichier config :
+#### Or you can use without the config file :
 
 ```py
 from nornir import InitNornir
@@ -67,53 +73,97 @@ nr = InitNornir(
     },
 )
 ```
-On peut également combiner ces deux méthodes.
+These two methods can also be combined.
 
-###  1.2. <a name='Inventaire'></a>Inventaire
-A l'aide du plugin *SimpleInventory*, nous allons stocker nos hôtes, groupes et valeurs par défaut dans un dossier inventory. Voici un exemple :
-```yaml
-#inventory/host.yaml
----
-veos1:
-    hostname: 172.16.2.1
-    groups:
-        - veos
-    connection_options:
-        napalm:
-            extras:
-                optional_args:
-                    enable_password: 'password'
+###  2. <a name='Inventory'></a>Inventory
+Using the *SimpleInventory* plugin, we will store our hosts, groups and defaults in an inventory folder as specified during Initialization. Here is the structure of our data:
 
-veos2:
-    hostname: 172.16.2.2
-    groups:
-        - veos
-    connection_options:
-        napalm:
-            extras:
-                optional_args:
-                    enable_password: 'password'
+```powershell
+C:.
+│   config.yaml
+│   main.py
+│
+└───inventory
+        defaults.yaml
+        groups.yaml
+        hosts.yaml
 ```
 
+### 2.1. <a name='Defaults'></a>Defaults
+We store the default values, in our case, we will store a default username and password:
 ```yaml
-#inventory/groups.yaml
+#inventory/defaults.yaml
 ---
-veos:
-    platform: 'eos'
-    data:
-        vlans:
+username: 'admin'
+password: 'password'
+
+```
+
+### 2.2. <a name='Hôtes'></a>Hôtes
+To register a host :
+```yml
+---
+veos1: # => Name
+    hostname: 172.16.2.1 # =>IP Adress
+    groups: #  => Group defined in the groups.yaml file
+        - veos
+    connection_options: # => Option specific to each host
+        napalm:
+            extras:
+                optional_args:
+                    enable_password: 'password'
+                    # => We retrieve the password defined in the defaults.yaml file
+```
+
+
+### 2.3. <a name='Groups'></a>Groups
+Here we will describe the common information :
+```yaml
+---
+veos: # => Name of the group
+    platform: 'eos'  # => Server
+    data: => # => Information that could have been stored in the hosts.yaml file, but storing it here optimises the code.
+        vlans:  # => Connecting to a virtual network
             - {id: 10, name: test10, ip: 10.1.10.254}
             - {id: 20, name: test20, ip: 10.1.20.254}
-        accesses:
+        accesses: 
             - {interface: 3, vlan_id: 10}
             - {interface: 4, vlan_id: 20}
         trunks:
             - {interface: 1, id: 1}
             - {interface: 2, id: 1}
+
 ```
-Ici, on voir qu'on a meme stocciée les adresses ip dans les vlans.
-```yaml
----
-username: 'admin'
-password: 'password'
+
+### 3. <a name='Visualisation'></a>Visualisation
+We will see how to display this data through a Python script
+###  3.1. <a name='Accessors'></a>Accessors
+To display the hosts, you only need to add this line:
+```py
+print(nr.inventory.hosts)
+```
+The same applies to groups:
+```py
+print(nr.inventory.groups)
+```
+###  3.2. <a name='Filters'></a>Filters
+We can filter with a single condition.
+```py
+print(nr.inventory.hosts)
+```
+But also with multiple conditions (prioritising if possible):
+```py
+nr.filter(site="cmh", role="spine").inventory.hosts.keys()
+
+```
+This works for both hosts and groups.
+
+### 4. <a name='Tasks'></a>Tasks
+Here, we will make a communication between the hosts :
+```py
+def say(task: Task, text: str) -> Result:
+    return Result(
+        host=task.host,
+        result=f"{task.host.name} says {text}" #=> We transmit from one host to the other the text message which is in parameter
+    )
 ```
